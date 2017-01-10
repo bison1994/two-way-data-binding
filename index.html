@@ -30,9 +30,9 @@
 				},
 				set: function (newVal) {
 					if (newVal === val) return
-          val = newVal;
-        	// 作为发布者发出通知
-        	dep.notify();
+					val = newVal;
+					// 作为发布者发出通知
+					dep.notify();
 				}
 			});
 		}
@@ -66,53 +66,60 @@
 						node.removeAttribute('v-model');
 					}
 				};
+
+				new Watcher(vm, node, name, 'input');
 			}
 			// 节点类型为text
 			if (node.nodeType === 3) {
 				if (reg.test(node.nodeValue)) {
 					var name = RegExp.$1; // 获取匹配到的字符串
 					name = name.trim();
-					// node.nodeValue = vm[name]; // 将data的值赋给该node
 
-					new Watcher(vm, node, name);		
+					new Watcher(vm, node, name, 'text');		
 				}
 			}
 		}
 
-		function Watcher (vm, node, name) {
-			Dep.target = this;	
+		function Watcher (vm, node, name, nodeType) {
+			Dep.target = this;
 			this.name = name;
 			this.node = node;
 			this.vm = vm;
+			this.nodeType = nodeType;
 			this.update();
 			Dep.target = null;
 		}
 
-    Watcher.prototype = {
-    	update: function () {
-    		this.get();
-    		this.node.nodeValue = this.value;
-    	},
-    	// 获取data中的属性值
-    	get: function () {
-    		this.value = this.vm[this.name]; // 触发相应属性的get
-    	}
-    }
+		Watcher.prototype = {
+			update: function () {
+				this.get();
+				if (this.nodeType == 'text') {
+					this.node.nodeValue = this.value;
+				}
+				if (this.nodeType == 'input') {
+					this.node.value = this.value;
+				}
+			},
+			// 获取data中的属性值
+			get: function () {
+				this.value = this.vm[this.name]; // 触发相应属性的get
+			}
+		}
 
 		function Dep () {
 			this.subs = []
 		}
 
 		Dep.prototype = {
-	    addSub: function(sub) {
-	      this.subs.push(sub);
-	    },
+			addSub: function(sub) {
+				this.subs.push(sub);
+			},
 
-	    notify: function() {
-        this.subs.forEach(function(sub) {
-          sub.update();
-        });
-	    }
+			notify: function() {
+				this.subs.forEach(function(sub) {
+					sub.update();
+				});
+			}
 		};
 
 		function Vue (options) {

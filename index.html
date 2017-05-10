@@ -43,7 +43,7 @@
       
       while (child = node.firstChild) {
         compile(child, vm);
-        flag.append(child); // 将子节点劫持到文档片段中
+        flag.appendChild(child); // 将子节点劫持到文档片段中
       }
 
       return flag;
